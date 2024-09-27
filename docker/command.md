@@ -74,3 +74,29 @@ docker container prume -a	종료한 컨테이너를 일괄 삭제
 docker commit <컨테이너명 | 컨테이너ID> 리포지터리[:태그]
 docker container commit <컨테이너명 | 컨테이너ID> 리포지터리[:태그]	컨테이너를 이미지로서 리포지터리에 저장
 ```
+
+# 디버그 관련 기능
+
+## 컨테이너 디버깅 관련
+
+```
+docker logs <컨테이너명 | 컨테이너ID>
+docker container logs <컨테이너명 | 컨테이너ID>	컨테이너 로그 출력
+docker logs -f <컨테이너명 | 컨테이너ID>
+docker container logs -f <컨테이너명 | 컨테이너ID>	컨테이너 로그를 실시간으로 표시
+docker ps -a
+docker container ls -a	컨테이너 목록 표시
+docker exec -it <컨테이너명 | 컨테이너ID>커맨드
+docker container exec -it <컨테이너명 | 컨테이너ID> 커맨드	실행 중인 컨테이너에 대해서 대화형으로 커맨드 실행
+docker inspect <컨테이너명 | 컨테이너ID>
+docker container inspect <컨테이너명 | 컨테이너ID>	상세한 컨테이너의 정보를 표시
+docker stats
+docker container stats	컨테이너 실행 상태를 실시간으로 표시
+docker pause <컨테이너명 | 컨테이너ID>
+docker container pause <컨테이너명 | 컨테이너ID>	컨테이너를 일시정지
+docker unpause <컨테이너명 | 컨테이너ID>
+docker container unpause <컨테이너명 | 컨테이너ID>	컨테이너 일시정지를 해제
+docker start -a <컨테이너명 | 컨테이너ID>
+docker container start -a <컨테이너명 | 컨테이너ID>	정지한 컨테이너를 실행.
+이때 표준 출력과 표준 에러 출력을 터미널에 출력
+```
