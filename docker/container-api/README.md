@@ -172,3 +172,58 @@ done
 `docker build --tag my_daemon:0.2 -f Dockerfile2 .`
 
 `docker run --name myd my_daemon:0.2`
+이건 파일을 저장하고 있지만 컨테이너가 지워지면 파일도 지워진다.
+
+# 퍼시스턴스 볼륨 API 구현 예
+
+컨테이너를 지워도 데이터를 잃지 않기 위해서는 퍼시스턴스 볼륨을 사용해야 한다.
+
+```docker
+FROM alpine:latest
+RUN apk update && apk add bash
+ADD ./my_daemon3 /my_daemon
+CMD ["/bin/bash", "/my_daemon"]
+```
+
+```bash
+# 카운터 초기화
+COUNT=0
+
+# 퍼시스턴트 볼륨
+PV=/pv/save.dat
+
+# 환경변수가 없으면 설정
+if [ -z "$INTERVAL" ]; then
+    INTERVAL=3
+fi
+
+# 기동 시 상태 취득
+if [ -f $PV ]; then
+   COUNT=`cat $PV`
+   rm -f $PV
+fi
+
+# SIGTERM 시그널 처리
+save() {
+  echo $COUNT > $PV
+  exit
+}
+trap save TERM
+
+# 메인 루프
+while [ ture ];
+do
+    TM=`date|awk '{print $4}'`
+    printf "%s : %s \n" $TM $COUNT
+    let COUNT=COUNT+1
+    sleep $INTERVAL
+done
+```
+
+`mkdir data`
+
+`docker build --tag my_daemon:0.3 -f Dockerfile3 .`
+
+```bash
+docker run --name myd3 -v `pwd`/data:/pv my_daemon:0.3
+```
