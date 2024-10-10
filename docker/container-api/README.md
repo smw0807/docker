@@ -78,3 +78,37 @@ PID가 1인 프로세스의 Exit 코드가 컨테이너의 종료 코드로 설�
 예를 들어, 한 컨테이너가 데이터베이스 컨테이너를 필요로 하는 경우엔 같은 네트워크에 묶으면 된다.
 
 메모리 요구량이나 CPU 요구 시간의 경우에는 컨테이너 실행 전에 필요한 크기를 예측하여 설정하면 쿠버네티스가 스케줄링을 효과적으로 수행하여 문제를 미연에 방지할 수 있다.
+
+# 환경 변수 API 구현 예
+
+```docker
+FROM alpine:latest
+RUN apk update && apk add bash
+ADD ./my_deamon /my_deamon
+CMD ["/bin/bash", "/my_deamon"]
+```
+
+```bash
+# 카운터 초기화
+COUNT=0
+
+# 환경 변수가 없으면 설정
+if [ -z "$INTERVAL" ]; then
+  INTERVAL=3
+fi
+
+# 메인 루프
+while [ ture ];
+do
+  TM=`date|awk '{print $4}'`
+  printf " %s : $s \n" $TM $COUNT
+  let COUNT=COUNT+1
+  sleep $INTERVAL
+done
+```
+
+`docker build --tag my_daemon:0.1 .`
+
+`docker run --name myd my_daemon:0.1`
+
+`docker run --name myd -e INTERVAL=1  my_daemon:0.1`
