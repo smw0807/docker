@@ -112,3 +112,63 @@ done
 `docker run --name myd my_daemon:0.1`
 
 `docker run --name myd -e INTERVAL=1  my_daemon:0.1`
+
+# 종료 요청 API 구현 예
+
+쿠버네티스는 컨테이너를 언제든지 종료할 수 있는 일시적 존재로 다룬다.
+예를 들어, 하드웨어 점검을 위해 또는 애플리케이션의 버전을 업데이트할 때 등 종료 요청 시그널을 보내 컨테이너를 종료한다.
+
+그래서 쿠버네티스에서 돌아가는 컨테이너를 개발할 때는 종료 요청 시그널 처리를 구현하는 것이 좋다.
+종료 요청 시그널에 대한 처리는 프로그래밍 언어나 실행 환경에 따라 다르기 때문에 채택한 환경에 맞게 구현해야 한다.
+
+시그널을 유닉스 계열의 운영체제에서 프로세스에게 이벤트를 비동기적으로 전달하기 위해 존재한다.
+커널로부터 시그널을 받은 프로세스는 인터럽트된다.
+미리 시그널 처리 루틴(시그널 핸들러)을 등록해 두면 시그널을 받았을 때 필요한 처리를 수행할 수 있다.
+
+`docker stop` 명령어는 컨테이너가 PID가 1인 프로세스에게 시그널 SIGTERM을 전달하여 종료 처리를 요청한다.
+도커의 경우 이 시그널을 보내고 10초를 기다린 뒤 강제 종료 한다.
+
+`docker kill` 명령어를 사용하면 컨테이너상의 PID가 1인 프로세스가 SIGKILL 시그널을 받고 바로 강제 종료 된다.
+
+```docker
+FROM alpine:latest
+RUN apk update && apk add bash
+ADD ./my_daemon2 /my_daemon
+CMD ["/bin/bash", "/my_daemon"]
+```
+
+```bash
+# 카운터 초기화
+COUNT=0
+
+# 환경변수가 없으면 설정
+if [ -z "$INTERVAL" ]; then
+    INTERVAL=3
+fi
+
+# 기동시 상태 취득
+if [ -f save.dat ]; then
+   COUNT=`cat save.dat`
+   rm -f save.dat
+fi
+
+# SIGTERM 시그널 처리
+save() {
+  echo $COUNT > save.dat
+  exit
+}
+trap save TERM
+
+# 메인 루프
+while [ ture ];
+do
+    TM=`date|awk '{print $4}'`
+    printf "%s : %s \n" $TM $COUNT
+    let COUNT=COUNT+1
+    sleep $INTERVAL
+done
+```
+
+`docker build --tag my_daemon:0.2 -f Dockerfile2 .`
+
+`docker run --name myd my_daemon:0.2`
