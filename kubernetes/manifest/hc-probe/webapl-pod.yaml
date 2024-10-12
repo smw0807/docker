@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: webapl
+spec:
+  containers:
+    - name: webapl
+      image: webapl:0.1 # (1)핸드러를 구현한 애플리케이션
+      livenessProbe: # (2)애플리케이션이 살아있는지 확인
+        httpGet:
+          path: /healthz # 확인 경로
+          port: 3000
+        initialDelaySeconds: 3 # 검사 개시 대기 시간
+        periodSeconds: 5 # 검사 간격
+      readinessProbe: # (3) 애플리케이션이 준비되었는지 확인
+        httpGet:
+          path: /ready # 확인 경로
+          port: 3000
+        initialDelaySeconds: 15
+        periodSeconds: 6
