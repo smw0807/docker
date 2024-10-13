@@ -1,0 +1,27 @@
+## 사이드카 파드 예제
+#
+apiVersion: v1
+kind: Pod
+metadata:
+  name: webserver
+spec:
+  containers: ## 메인 컨테이너
+    - name: nginx
+      image: nginx
+      volumeMounts:
+        - mountPath: /usr/share/nginx/html
+          name: contents-vol
+          readOnly: true
+
+    - name: cloner ## 사이드카 컨테이너
+      image: c-cloner:0.1
+      env:
+        - name: CONTENTS_SOURCE_URL
+          value: 'https://github.com/takara9/web-contents'
+      volumeMounts:
+        - mountPath: /data
+          name: contents-vol
+
+  volumes: ## 공유 볼륨
+    - name: contents-vol
+      emptyDir: {}
