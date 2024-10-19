@@ -1,0 +1,17 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-deploy
+spec:
+  replicas: 3
+  selector: # 디플로이먼트와 파드를 매핑하는 설정
+    matchLabels:
+      app: web
+  template: # 파드 템플릿
+    metadata:
+      labels:
+        app: web # 파드에 부여할 라벨
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:latest
