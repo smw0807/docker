@@ -214,3 +214,25 @@ spec:
       port: 80
   sessionAffinity: ClientIP # 클라이언트 IP 주소에 따라 전송될 파드가 결정됨
 ```
+
+# NodePort 사용
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-service-np
+spec:
+  selector:
+    app: web
+  ports:
+    - protocol: TCP
+      port: 80
+  type: NodePort
+```
+
+`kubectl get svc`
+
+`web-service-np   NodePort    10.99.176.130   <none>        80:31017/TCP   18s`
+
+80번 포트가 31017 포트에 매핑되어 있다.
