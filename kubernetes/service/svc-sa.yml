@@ -3,8 +3,9 @@ kind: Service
 metadata:
   name: web-service
 spec:
-  selector: # 서비스와 파드를 매핑하는 설정
+  selector:
     app: web
   ports:
     - protocol: TCP
       port: 80
+  sessionAffinity: ClientIP # 클라이언트 IP 주소에 따라 전송될 파드가 결정됨

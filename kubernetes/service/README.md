@@ -196,3 +196,21 @@ spec:
 | protocol  | 생략 시에는 TCP가 설정됨. TCP 혹은 UDP 설정 가능                                                                                                                |
 | nodePort  | 생략 시에는 시스템이 자동으로 할당. type이 NodePort나 LoadBalancer인 경우 모든 노드에서 포트를 공개. 설정한 포트가 이미 사용 중인 경우에는 오브젝트 생성에 실패 |
 | tagerPort | 생략 시에는 port와 동일한 값이 사용됨. selector에 의해 대응되는 파드가 공개하는 포트번호 또는 포트 이름을 설정함                                                |
+
+# 세션 어피니티
+
+경우에 따라 동일한 클라이언트에서 온 요청은 언제나 같은 파드에 전송하고 싶을 때 매니페스트의 세션 어피니티를 ClientIP로 설정하면 된다.
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-service
+spec:
+  selector:
+    app: web
+  ports:
+    - protocol: TCP
+      port: 80
+  sessionAffinity: ClientIP # 클라이언트 IP 주소에 따라 전송될 파드가 결정됨
+```
