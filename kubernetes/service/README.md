@@ -236,3 +236,18 @@ spec:
 `web-service-np   NodePort    10.99.176.130   <none>        80:31017/TCP   18s`
 
 80번 포트가 31017 포트에 매핑되어 있다.
+
+# ExternalName
+
+쿠버네티스상의 파드에서 외부의 애플리케이션에 접속하는 하이브리드 구성의 애플리케이션을 개발할 때 유용하다.
+파드에서는 서비스의 이름으로 외부의 엔드포인트에 접근할 수 있다.
+
+```yaml
+kind: Service
+apiVersion: v1
+metadata:
+  name: apl-on-baremetal
+spec:
+  type: ExternalName
+  externalName: 10.132.253.7
+```
