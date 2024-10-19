@@ -107,3 +107,51 @@ metadata:
 spec:
   clusterIP: None
 ```
+
+# 서비스와 파드의 연결
+
+서비스가 요청을 전송할 파드를 결정할 때는 셀렉터의 라벨과 일치하는 파드를 etcd로 부터 선택한다.
+
+```yaml
+## 서비스
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-service
+spec: # type을 생략하여 ClusterIP가 적용된다.
+  selector: # service - 백엔드 pod와 연결
+    app: web
+  ports:
+    - protocol: TCP
+      port: 80
+```
+
+```yaml
+## 디플로이먼트
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-deploy
+spec:
+  replicas: 3
+  selector: # deployment - pod 대응용
+    matchLabels:
+      app: web
+  template: # 여기서부터 파드 템플릿
+    metadata:
+      labels:
+        app: web # 파드의 라벨
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:latest
+```
+
+서비스의 셀렉터(selector)와 디플로이먼트 파드 템플릿의 metadata.labels에 같은 라벨 `app.web` 을 기술한다.
+
+하나의 파드 템플릿으로 만들어지는 파드들은 같은 속성이 부여되므로 라벨도 같다.
+따라서 디플로이먼트에 의해 만들어지는 파드들은 같은 라벨을 가지게 되어 서비스의 요청을 전송받는다.
+
+이처럼 라벨에 의해 전송되는 파드를 결정하는 방식은 큰 유연성을 가져다 준다.
+셀렉터의 값을 바꾸는 것만으로 서비스가 전송되는 파드의 그룹을 바꿀 수 있어 운영상의 유연성을 가질 수 있다.
+그러나 라벨이 중복되면 의도치 않은 파드로 요청이 전송될 수 있어 중복되지 않도록 프로젝트 운영 규칙을 정하는 것이 중요하다.
