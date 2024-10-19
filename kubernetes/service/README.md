@@ -31,7 +31,79 @@ NodePort 타입의 서비스를 만들면 클러스터의 모든 노드에 이�
 이때 요청을 받은 노드 내에 있는 파드로만 전송하도록 설정할 수도 있다.
 노드들 앞에 로드밸런서가 있다면 매우 유용한 설정이다.
 
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-service-np
+spec:
+  selector:
+    app: web
+  ports:
+    - protocol: TCP
+      port: 80
+  type: NodePort
+```
+
 # 서비스 타입 LoadBalancer
 
 서비스 타입 LoadBalancer는 로드밸런서와 연동하여 파드의 애플리케이션을 외부에 공개한다.
 또한, LoadBalancer는 NodePort를 사용하기 때문에 ClusterIP도 자동적으로 만들어 진다.
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-service-lb
+spec:
+  selector:
+    app: web
+  ports:
+    - name: webserver
+      protocol: TCP
+      port: 80
+  type: LoadBalancer
+```
+
+# 서비스 타입 ExternalName
+
+서비스 타입 ExternalName은 지금까지 살펴본 것들과 반대로, 파드에서 쿠버네티스 클러스터 외부의 엔드포인트에 접속하기 위한 이름을 해결해준다.
+예를 들어, 퍼블릭 클라우드의 데이터베이스나 인공지능 API 서비스 등을 접근할 때 사용될 수 있다.
+
+ExternalName은 서비스의 이름과 외부 DNS 이름의 매핑을 내부 DNS에 설정한다.
+이를 통해 파드는 서비스의 이름으로 외부 네트워크와 엔드포인트에 접근할 수 있다.
+포트 번호는 지정할 수 없다.
+
+```yaml
+kind: Service
+apiVersion: v1
+metadata:
+  name: yahoo
+spec:
+  type: ExternalName
+  externalName: www.yahoo.co.jp
+```
+
+이 서비스 타입은 파드에서 쿠버네티스 클러스터 외부의 엔드포인트에 접속할 때 편리하다.
+네임스페이스에서의 서비스 이름으로 IP 주소를 얻을 수 있기 때문이다.
+또한, 쿠버네티스 클러스터 내의 서비스로 교체하기도 쉽다.
+
+다만, 외부 DNS 명을 등록하는 항목 `spec.externalName` 에는 IP 주소를 설정할 수 없다.
+서비스의 매니페스트에 IP 주소를 설정하고 싶은 경우에는 헤드레스 서비스를 이용해야 한다.
+
+```yaml
+kind: Endpoints
+apiVersion: v1
+metadata:
+  name: server1
+subsets:
+  - addresses:
+      - ip: 192.168.1.16
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: server1
+spec:
+  clusterIP: None
+```
